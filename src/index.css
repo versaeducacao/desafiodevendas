@@ -1,0 +1,139 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Mulish:wght@300;400;500;600;700&display=swap");
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ev-bg:        #090733;
+  --ev-bg-2:      #100c4c;
+  --ev-panel:     #1a1566;
+  --ev-panel-2:   #221c7a;
+  --ev-gold:        #c9a24b;
+  --ev-gold-bright: #ecc869;
+  --ev-gold-soft:   rgba(201,162,75,.18);
+  --ev-line:      rgba(201,162,75,.22);
+  --ev-line-soft: rgba(201,162,75,.12);
+  --ev-ink:     #f2f1fb;
+  --ev-muted:   #aaa6d4;
+  --ev-muted-2: #7d79ac;
+  --ev-font-display: "Archivo", sans-serif;
+  --ev-font-body:    "Mulish", sans-serif;
+  --ev-radius-pill: 999px;
+  --ev-radius-lg:   18px;
+  --ev-radius-md:   14px;
+  --ev-radius-sm:   12px;
+  --ev-bg-atmosphere:
+    radial-gradient(900px 600px at 78% -10%, rgba(201,162,75,.12), transparent 60%),
+    radial-gradient(700px 500px at 8% 8%, rgba(120,110,255,.10), transparent 55%),
+    linear-gradient(180deg,#090733 0%,#0c0942 60%,#090733 100%);
+  --ev-shadow-lift: 0 18px 50px -22px rgba(0,0,0,.8),
+                    0 0 0 1px rgba(201,162,75,.12) inset,
+                    0 0 40px -20px rgba(201,162,75,.5);
+}
+
+body {
+  min-height: 100vh;
+  font-family: var(--ev-font-body);
+  color: var(--ev-ink);
+  background: var(--ev-bg-atmosphere);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: rgba(201,162,75,.30); color: #fff; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--ev-bg); }
+::-webkit-scrollbar-thumb { background: var(--ev-line); border-radius: 3px; }
+
+/* Card */
+.ev-card {
+  background: linear-gradient(180deg, var(--ev-panel), var(--ev-bg-2));
+  border: 1px solid var(--ev-line);
+  border-radius: var(--ev-radius-lg);
+  padding: 22px;
+}
+
+/* Lift */
+.ev-lift { transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s, border-color .35s; }
+.ev-lift:hover { transform: translateY(-4px); border-color: rgba(201,162,75,.45); box-shadow: var(--ev-shadow-lift); }
+
+/* Button primary */
+.ev-btn {
+  font-family: var(--ev-font-body); font-weight: 800; font-size: 14px;
+  padding: 13px 22px; border: none; border-radius: var(--ev-radius-pill); cursor: pointer;
+  background: linear-gradient(180deg, var(--ev-gold-bright), var(--ev-gold));
+  color: #1a1208;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  transition: filter .2s, transform .2s, opacity .2s;
+}
+.ev-btn:hover { filter: brightness(1.07); transform: translateY(-1px); }
+.ev-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; filter: none; }
+
+/* Button ghost */
+.ev-btn-ghost {
+  font-family: var(--ev-font-body); font-weight: 700; font-size: 14px;
+  padding: 13px 22px; border-radius: var(--ev-radius-pill); cursor: pointer;
+  background: transparent; border: 1px solid var(--ev-line); color: var(--ev-ink);
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  transition: border-color .25s, background .25s;
+}
+.ev-btn-ghost:hover { border-color: var(--ev-gold); background: rgba(201,162,75,.06); }
+
+/* Input */
+.ev-input, .ev-textarea, .ev-select {
+  width: 100%; font-family: var(--ev-font-body); font-size: 14px; color: var(--ev-ink);
+  padding: 11px 14px; border-radius: var(--ev-radius-sm); outline: none;
+  background: rgba(255,255,255,.04); border: 1px solid var(--ev-line);
+  transition: border-color .2s;
+}
+.ev-input:focus, .ev-textarea:focus, .ev-select:focus { border-color: var(--ev-gold); }
+.ev-textarea { resize: vertical; min-height: 72px; }
+.ev-select { appearance: none; cursor: pointer; }
+::placeholder { color: var(--ev-muted-2); }
+
+/* Chip */
+.ev-chip {
+  font-family: var(--ev-font-body); font-weight: 600; font-size: 13px;
+  padding: 8px 14px; border-radius: var(--ev-radius-pill); cursor: pointer;
+  background: transparent; border: 1px solid var(--ev-line); color: var(--ev-muted);
+  transition: all .2s; white-space: nowrap;
+}
+.ev-chip:hover { border-color: var(--ev-gold); color: var(--ev-ink); background: rgba(201,162,75,.06); }
+.ev-chip.is-active { border-color: transparent; color: #1a1208; background: linear-gradient(180deg, var(--ev-gold-bright), var(--ev-gold)); }
+
+/* Kicker */
+.ev-kicker { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ev-gold); font-weight: 700; }
+
+/* Hairline */
+.ev-hairline { height: 1px; background: linear-gradient(90deg, transparent, var(--ev-line), transparent); }
+
+/* Node */
+.ev-node {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ev-font-display); font-weight: 800; font-size: 14px;
+  background: rgba(201,162,75,.10); border: 1px solid var(--ev-line); color: var(--ev-gold);
+}
+.ev-node.is-active { background: linear-gradient(180deg, var(--ev-gold-bright), var(--ev-gold)); border-color: transparent; color: #1a1208; }
+.ev-node.is-done { background: rgba(201,162,75,.20); border-color: var(--ev-gold); color: var(--ev-gold-bright); }
+
+/* Tag */
+.ev-tag {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700;
+  padding: 3px 8px; border-radius: var(--ev-radius-pill);
+  color: var(--ev-gold-bright); border: 1px solid rgba(201,162,75,.34);
+  display: inline-block;
+}
+
+/* Fade up animation */
+@keyframes ev-fade-up { to { opacity: 1; transform: none; } }
+.ev-fade-up { opacity: 0; transform: translateY(14px); animation: ev-fade-up .5s forwards; }
+
+@keyframes ev-spin { to { transform: rotate(360deg); } }
+.ev-spin { animation: ev-spin 1s linear infinite; }
+
+/* Noise overlay */
+.ev-noise::after {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
