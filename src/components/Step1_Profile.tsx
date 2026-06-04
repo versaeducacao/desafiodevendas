@@ -5,10 +5,16 @@ import {
   QUANTIDADE_LOJAS_OPTIONS, isMultiLoja,
 } from "../data/questions";
 import { Select } from "./Select";
+import {
+  checkUserByEmail, upsertUsuario,
+  deletePreviousDiagnosticos, startNewSession, setUserId,
+  setSessionId, clearLojaId, type ExistingSession,
+} from "../lib/saveData";
 
 interface Props {
   initial: StoreProfile;
   onSave: (profile: StoreProfile) => void;
+  onResume: (session_id: string) => void;
 }
 
 // ─── tiny shared primitives ────────────────────────────────────────────────
@@ -203,14 +209,17 @@ function isStepDone(id: string, form: StoreProfile): boolean {
 
 // ─── Main component ────────────────────────────────────────────────────────
 
-export function Step1_Profile({ initial, onSave }: Props) {
+export function Step1_Profile({ initial, onSave, onResume }: Props) {
   const [form, setForm] = useState<StoreProfile>(initial);
   const [activeIdx, setActiveIdx] = useState(() => {
-    // Start at first unanswered step
     const steps = buildSteps(initial);
     const first = steps.findIndex((s) => !isStepDone(s.id, initial));
     return first === -1 ? steps.length - 1 : first;
   });
+
+  // Returning user dialog
+  const [existingSession, setExistingSession] = useState<ExistingSession | null>(null);
+  const [checkingUser, setCheckingUser] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -240,11 +249,44 @@ export function Step1_Profile({ initial, onSave }: Props) {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
   }
 
+  // After contato step: check if user already exists in DB
+  async function handleContatoAdvance() {
+    if (!form.email || !form.whatsapp) return;
+    setCheckingUser(true);
+    const existing = await checkUserByEmail(form.email);
+    setCheckingUser(false);
+    if (existing) {
+      setExistingSession(existing);
+    } else {
+      // New user — create in DB and advance
+      const uid = await upsertUsuario(form.nome_responsavel, form.email, form.whatsapp);
+      if (uid) setUserId(uid);
+      advance();
+    }
+  }
+
+  async function handleResume() {
+    if (!existingSession) return;
+    setUserId(existingSession.usuario_id);
+    setSessionId(existingSession.session_id);
+    onResume(existingSession.session_id);
+  }
+
+  async function handleStartNew() {
+    if (!existingSession) return;
+    await deletePreviousDiagnosticos(existingSession.usuario_id);
+    setUserId(existingSession.usuario_id);
+    clearLojaId();
+    startNewSession();
+    setExistingSession(null);
+    advance();
+  }
+
   // Auto-advance when step becomes done (for choice-only steps)
   useEffect(() => {
     const current = steps[activeIdx];
     if (!current) return;
-    const autoAdvance = ["quantidade_lojas", "escopo_diagnostico", "segmento_localizacao"];
+    const autoAdvance = ["quantidade_lojas", "escopo_diagnostico"];
     if (autoAdvance.includes(current.id) && isStepDone(current.id, form)) {
       const t = setTimeout(advance, 320);
       return () => clearTimeout(t);
@@ -289,7 +331,11 @@ export function Step1_Profile({ initial, onSave }: Props) {
                   type="tel" placeholder="(11) 99999-9999" />
               </div>
             </div>
-            <NextBtn disabled={!form.email.trim() || !form.whatsapp.trim()} onClick={advance} />
+            <NextBtn
+              disabled={!form.email.trim() || !form.whatsapp.trim() || checkingUser}
+              onClick={handleContatoAdvance}
+              label={checkingUser ? "Verificando…" : "Continuar →"}
+            />
           </>
         );
 
@@ -346,6 +392,7 @@ export function Step1_Profile({ initial, onSave }: Props) {
                 <Select value={form.localizacao_tipo} onChange={(v) => set("localizacao_tipo", v)} options={LOCALIZACOES} />
               </div>
             </div>
+            <NextBtn disabled={!form.segmento} onClick={advance} />
           </>
         );
 
@@ -527,6 +574,36 @@ export function Step1_Profile({ initial, onSave }: Props) {
           </span>
         </div>
       </div>
+
+      {/* Returning user dialog */}
+      {existingSession && (
+        <div className="ev-card ev-fade-up" style={{
+          marginBottom: 16,
+          border: "1px solid rgba(201,162,75,.4)",
+          background: "linear-gradient(160deg, rgba(201,162,75,.08), rgba(16,12,76,.8))",
+        }}>
+          <span className="ev-kicker" style={{ display: "block", marginBottom: 10 }}>
+            Bem-vindo de volta, {existingSession.nome.split(" ")[0]}!
+          </span>
+          <p style={{ fontSize: 14, color: "var(--ev-ink)", marginBottom: 4 }}>
+            Encontramos um diagnóstico anterior{existingSession.nome_loja ? ` da loja <strong>${existingSession.nome_loja}</strong>` : ""}.
+          </p>
+          <p style={{ fontSize: 12, color: "var(--ev-muted)", marginBottom: 20 }}>
+            {existingSession.completed
+              ? "Esse diagnóstico foi concluído."
+              : "Esse diagnóstico estava em andamento."}
+            {" "}O que você quer fazer?
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <button className="ev-btn" onClick={handleResume} style={{ width: "100%" }}>
+              Continuar de onde parei
+            </button>
+            <button className="ev-btn-ghost" onClick={handleStartNew} style={{ width: "100%", fontSize: 13 }}>
+              Começar um novo diagnóstico (descarta o anterior)
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Progressive steps */}
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

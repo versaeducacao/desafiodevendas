@@ -6,7 +6,7 @@ import {
   saveOpenAnswers, loadOpenAnswers, saveStep, loadStep, clearAll,
 } from "./data/storage";
 import { computeDiagnostic } from "./data/scoring";
-import { upsertProfile, upsertAnswers, saveResult, clearSessionId } from "./lib/saveData";
+import { upsertProfile, upsertAnswers, saveResult, clearSessionId, setSessionId } from "./lib/saveData";
 import { StepIndicator } from "./components/StepIndicator";
 import { Step0_Welcome } from "./components/Step0_Welcome";
 import { Step1_Profile } from "./components/Step1_Profile";
@@ -40,6 +40,13 @@ export default function App() {
     setProfile(p);
     saveProfile(p);
     upsertProfile(p);
+    goTo(BLOCK_STEP_OFFSET);
+  }
+
+  function handleResume(session_id: string) {
+    // Sync the session_id from DB into localStorage and jump to blocks
+    setSessionId(session_id);
+    saveStep(BLOCK_STEP_OFFSET);
     goTo(BLOCK_STEP_OFFSET);
   }
 
@@ -137,7 +144,7 @@ export default function App() {
         )}
 
         {step === 1 && (
-          <Step1_Profile initial={profile} onSave={handleProfileSave} />
+          <Step1_Profile initial={profile} onSave={handleProfileSave} onResume={handleResume} />
         )}
 
         {step >= BLOCK_STEP_OFFSET && step <= BLOCK_STEP_OFFSET + BLOCKS.length - 1 && (
