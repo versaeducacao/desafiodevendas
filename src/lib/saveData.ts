@@ -3,15 +3,18 @@ import { BLOCKS } from "../data/questions";
 import type { StoreProfile } from "../data/questions";
 import type { DiagnosticResult } from "../data/scoring";
 
-// Gera string compacta das respostas na ordem A1..G6
-// Ex: "21210021201101..." — posição = ordem das perguntas, valor = 0/1/2 ou "-" se não respondido
+// Gera string de perfil no formato "A12-A22-A30-...-D102-...-G62"
+// Cada token = questao_id + score. Perguntas não respondidas são omitidas.
+// Separador "-" entre perguntas facilita leitura por humanos e LLMs.
 export function generateStringPerfil(answers: Record<string, number>): string {
   return BLOCKS.flatMap((block) =>
-    block.questions.map((_, i) => {
-      const key = `${block.id}${i + 1}`;
-      return answers[key] !== undefined ? String(answers[key]) : "-";
-    })
-  ).join("");
+    block.questions
+      .map((_, i) => {
+        const key = `${block.id}${i + 1}`;
+        return answers[key] !== undefined ? `${key}${answers[key]}` : null;
+      })
+      .filter((v): v is string => v !== null)
+  ).join("-");
 }
 
 const SESSION_KEY = "edv_session_id";
