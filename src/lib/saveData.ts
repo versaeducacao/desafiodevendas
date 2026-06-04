@@ -1,6 +1,18 @@
 import { supabase } from "./supabase";
+import { BLOCKS } from "../data/questions";
 import type { StoreProfile } from "../data/questions";
 import type { DiagnosticResult } from "../data/scoring";
+
+// Gera string compacta das respostas na ordem A1..G6
+// Ex: "21210021201101..." — posição = ordem das perguntas, valor = 0/1/2 ou "-" se não respondido
+export function generateStringPerfil(answers: Record<string, number>): string {
+  return BLOCKS.flatMap((block) =>
+    block.questions.map((_, i) => {
+      const key = `${block.id}${i + 1}`;
+      return answers[key] !== undefined ? String(answers[key]) : "-";
+    })
+  ).join("");
+}
 
 const SESSION_KEY = "edv_session_id";
 const USER_ID_KEY  = "edv_user_id";
@@ -261,10 +273,15 @@ export async function upsertAnswers(
 
 // ── Result ────────────────────────────────────────────────────
 
-export async function saveResult(result: DiagnosticResult) {
+export async function saveResult(
+  result: DiagnosticResult,
+  answers: Record<string, number>
+) {
   if (!supabase) return;
   const session_id = getSessionId();
+  const loja_id    = getLojaId();
 
+  // 1. Salva resultado no diagnóstico
   await supabase.from("diagnosticos").upsert({
     session_id,
     score_total:      result.totalScore,
@@ -277,4 +294,12 @@ export async function saveResult(result: DiagnosticResult) {
     calibragem_ia:   result.aiCalibration,
     completed: true,
   }, { onConflict: "session_id" });
+
+  // 2. Gera e salva string_perfil na loja (rag_perfil fica vazio para preenchimento via API)
+  if (loja_id) {
+    const string_perfil = generateStringPerfil(answers);
+    await supabase.from("lojas")
+      .update({ string_perfil })
+      .eq("id", loja_id);
+  }
 }

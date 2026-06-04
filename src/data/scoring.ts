@@ -1,4 +1,5 @@
 import { BLOCKS } from "./questions";
+// maxScore = 16+14+16+20+20+18+12 = 116
 
 export interface BlockScore {
   id: string;
@@ -58,12 +59,13 @@ export function computeDiagnostic(
   });
 
   const totalScore = blockScores.reduce((s, b) => s + b.score, 0);
-  const maxScore = 120;
+  const maxScore = BLOCKS.reduce((s, b) => s + b.max, 0); // 116 (A:16+B:14+C:16+D:20+E:20+F:18+G:12)
 
+  // Cohorts proporcionais ao novo max de 116
   const generalCohort =
-    totalScore <= 41 ? "Loja Inicial" :
-    totalScore <= 77 ? "Loja Emergente" :
-    totalScore <= 101 ? "Loja Preparada" :
+    totalScore <= 40  ? "Loja Inicial" :
+    totalScore <= 75  ? "Loja Emergente" :
+    totalScore <= 98  ? "Loja Preparada" :
     "Loja Avançada";
 
   const strengths = blockScores.filter((b) => b.isStrong).map((b) => b.label);

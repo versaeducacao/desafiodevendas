@@ -83,7 +83,7 @@ export default function App() {
   const result = step === 10 ? computeDiagnostic(answers) : null;
 
   useEffect(() => {
-    if (step === 10 && result) saveResult(result);
+    if (step === 10 && result) saveResult(result, answers);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
   const showHeader = step > 0 && step < 10;

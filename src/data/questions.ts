@@ -145,14 +145,12 @@ export const QUESTION_ANSWERS: Record<string, [string, string, string]> = {
   F8: ["Só percebemos que um vendedor está ficando para trás quando já é tarde","Com o tempo percebemos, mas sem processo ágil nos primeiros dias","Identificamos rapidamente a evolução do vendedor novo e agimos quando necessário"],
   F9: ["O turnover é alto e não está sob controle — perdemos vendedores com frequência","O turnover existe mas está em nível aceitável, embora ainda cause algum impacto","O turnover é baixo e controlado — conseguimos manter e desenvolver o time com estabilidade"],
 
-  G1: ["Não usamos metas semanais e seria difícil adotar esse ritmo agora","Ainda não usamos, mas seria possível adaptar a rotina para isso","Já trabalhamos com metas semanais ou adotaríamos esse ritmo sem dificuldade"],
-  G2: ["O time provavelmente resistiria a desafios semanais — não temos essa cultura","Parte do time aceitaria, mas teríamos resistência de alguns vendedores","O time aceitaria — há abertura e engajamento para esse tipo de dinâmica"],
-  G3: ["Não temos comissão, prêmio ou incentivo vinculado ao desempenho de venda","Existe algum incentivo, mas não é estruturado ou recorrente","Temos comissão, prêmio ou incentivo que reconhece o desempenho dos vendedores"],
-  G4: ["O gerente teria dificuldade para comunicar um desafio semanal de forma clara","O gerente conseguiria comunicar, mas sem garantia de engajamento do time","O gerente conseguiria comunicar o desafio da semana de forma clara e motivadora"],
-  G5: ["O gerente não teria como acompanhar se o desafio foi executado","O gerente conseguiria acompanhar parcialmente, mas sem processo regular","O gerente conseguiria acompanhar a execução do desafio e dar retorno ao time"],
-  G6: ["O time não usa WhatsApp no dia a dia da operação da loja","Parte do time usa para comunicação, mas não como ferramenta central da operação","O time usa WhatsApp ativamente — é o principal canal de comunicação da operação"],
-  G7: ["Não vejo utilidade em ter uma IA respondendo dúvidas durante o atendimento","Poderia ser útil em alguns momentos, mas teria dúvidas sobre como o time usaria","Seria muito útil ter uma IA apoiando o time com respostas rápidas no atendimento"],
-  G8: ["Não vejo utilidade em ter missões especiais antes de datas comerciais","Poderia ser interessante em algumas datas, mas não sei se o time aderiria bem","Seria muito útil ter missões especiais para preparar o time antes de datas importantes"],
+  G1: ["Não sabemos o que nos diferencia — vendemos o que todo mundo vende","Temos uma ideia do que nos diferencia, mas não comunicamos isso com clareza","Sabemos exatamente o que nos diferencia e o time usa isso nas vendas"],
+  G2: ["Não sabemos identificar quem são nossos clientes recorrentes","Percebemos quem costuma voltar, mas sem registro ou acompanhamento formal","Identificamos os clientes recorrentes e temos alguma forma de valorizá-los"],
+  G3: ["Tudo passa pelo gerente ou dono — o time não resolve nada sozinho","Em situações simples o time tem autonomia, mas situações difíceis sempre travam","O time resolve a maioria das situações com autonomia e bom senso"],
+  G4: ["Não costumamos mudar a forma de vender — fazemos o que sempre fizemos","Já tentamos algumas mudanças, mas sem processo para avaliar e incorporar","Testamos, avaliamos o que funcionou e incorporamos as mudanças que deram certo"],
+  G5: ["O dia a dia consome todo o tempo — não sobra espaço para pensar no negócio","Às vezes consigo parar para pensar, mas sem regularidade","Tenho tempo reservado para analisar o negócio e planejar com frequência"],
+  G6: ["Quando as vendas caem, geralmente não sabemos ao certo o que causou","Levantamos algumas hipóteses, mas sem muita certeza sobre o motivo real","Conseguimos identificar o motivo da queda e agir rapidamente para corrigir"],
 };
 
 export const MACRO_BLOCKS = [
@@ -299,24 +297,22 @@ export const BLOCKS = [
     strongThreshold: 14, criticalMax: 7,
   },
   {
-    id: "G", label: "Fit com a IA", fullLabel: "Fit para desafios semanais e IA", max: 16,
+    id: "G", label: "Aprofundamento", fullLabel: "Visão estratégica e maturidade do negócio", max: 12,
     questions: [
-      "A loja já usa metas semanais ou poderia adotar esse ritmo com facilidade?",
-      "O time aceitaria desafios simples de venda toda semana?",
-      "Existe algum tipo de comissão, prêmio ou incentivo por venda?",
-      "O gerente conseguiria comunicar o desafio da semana para o time?",
-      "O gerente conseguiria acompanhar se o desafio foi executado?",
-      "O time usa WhatsApp no dia a dia da operação?",
-      "Seria útil ter uma IA respondendo dúvidas de venda, produto ou objeção no momento do atendimento?",
-      "Seria útil ter missões especiais antes de datas comerciais importantes?",
+      "A loja sabe o que a diferencia das concorrentes próximas?",
+      "A loja tem clientes recorrentes e consegue identificá-los?",
+      "O time tem autonomia para resolver situações no atendimento sem depender do gerente?",
+      "A loja já testou mudanças na forma de vender e incorporou o que funcionou?",
+      "O dono ou gerente reserva tempo para pensar no negócio, além de operá-lo?",
+      "Quando as vendas caem, o time consegue identificar o motivo e agir?",
     ],
     cohorts: [
-      { min: 0, max: 5, label: "Baixo fit imediato" },
-      { min: 6, max: 10, label: "Fit moderado, precisa de simplicidade" },
-      { min: 11, max: 13, label: "Bom fit para piloto" },
-      { min: 14, max: 16, label: "Alto fit para rotina semanal com IA" },
+      { min: 0, max: 4, label: "Baixa maturidade estratégica" },
+      { min: 5, max: 8, label: "Visão em desenvolvimento" },
+      { min: 9, max: 10, label: "Boa visão do negócio" },
+      { min: 11, max: 12, label: "Alta maturidade e visão estratégica" },
     ],
-    strongThreshold: 12, criticalMax: 6,
+    strongThreshold: 9, criticalMax: 4,
   },
 ];
 
