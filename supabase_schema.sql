@@ -3,6 +3,7 @@
 -- Execute no Supabase SQL Editor
 -- ============================================================
 
+-- ── Tabela principal ──────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS diagnosticos (
   id              uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   created_at      timestamptz DEFAULT now(),
@@ -44,13 +45,10 @@ CREATE TABLE IF NOT EXISTS diagnosticos (
   vendedores_experientes   text,
   datas_comerciais         text[] DEFAULT '{}',
 
-  -- Respostas pontuadas (ex.: {"A1": 2, "B3": 1, ...})
-  answers       jsonb DEFAULT '{}',
-
-  -- Perguntas abertas (ex.: {"O1": "texto...", ...})
+  -- Perguntas abertas (O1..O10)
   open_answers  jsonb DEFAULT '{}',
 
-  -- Resultado
+  -- Resultado agregado
   score_total        integer,
   cohort_geral       text,
   scores_por_bloco   jsonb DEFAULT '{}',
@@ -62,7 +60,23 @@ CREATE TABLE IF NOT EXISTS diagnosticos (
   completed  boolean DEFAULT false
 );
 
--- Atualiza updated_at automaticamente
+-- ── Tabela de respostas individuais ──────────────────────────
+-- Uma linha por pergunta por diagnóstico.
+-- questao_id: "A1" … "G8"
+-- bloco:      "A"  … "G"
+-- resposta:   0, 1 ou 2
+CREATE TABLE IF NOT EXISTS respostas (
+  id             uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at     timestamptz DEFAULT now(),
+  diagnostico_id uuid REFERENCES diagnosticos(id) ON DELETE CASCADE,
+  session_id     text NOT NULL,
+  questao_id     text NOT NULL,
+  bloco          text NOT NULL,
+  resposta       integer NOT NULL CHECK (resposta IN (0, 1, 2)),
+  UNIQUE (session_id, questao_id)
+);
+
+-- ── Trigger: updated_at ───────────────────────────────────────
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -75,14 +89,48 @@ CREATE TRIGGER diagnosticos_updated_at
   BEFORE UPDATE ON diagnosticos
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
--- RLS: qualquer um pode inserir/atualizar pelo session_id
+-- ── RLS ───────────────────────────────────────────────────────
 ALTER TABLE diagnosticos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE respostas    ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "insert_own" ON diagnosticos
-  FOR INSERT WITH CHECK (true);
+-- diagnosticos
+CREATE POLICY "diag_insert" ON diagnosticos FOR INSERT WITH CHECK (true);
+CREATE POLICY "diag_update" ON diagnosticos FOR UPDATE USING (true);
+CREATE POLICY "diag_select" ON diagnosticos FOR SELECT USING (true);
 
-CREATE POLICY "update_own" ON diagnosticos
-  FOR UPDATE USING (true);
+-- respostas
+CREATE POLICY "resp_insert" ON respostas FOR INSERT WITH CHECK (true);
+CREATE POLICY "resp_update" ON respostas FOR UPDATE USING (true);
+CREATE POLICY "resp_select" ON respostas FOR SELECT USING (true);
 
-CREATE POLICY "select_own" ON diagnosticos
-  FOR SELECT USING (true);
+-- ── Views úteis ───────────────────────────────────────────────
+
+-- Média de cada resposta por pergunta (para benchmark)
+CREATE OR REPLACE VIEW v_media_por_questao AS
+SELECT
+  questao_id,
+  bloco,
+  COUNT(*)                          AS total_respostas,
+  ROUND(AVG(resposta)::numeric, 2)  AS media,
+  COUNT(*) FILTER (WHERE resposta = 0) AS pct_0,
+  COUNT(*) FILTER (WHERE resposta = 1) AS pct_1,
+  COUNT(*) FILTER (WHERE resposta = 2) AS pct_2
+FROM respostas
+GROUP BY questao_id, bloco
+ORDER BY bloco, questao_id;
+
+-- Score por bloco por diagnóstico completo
+CREATE OR REPLACE VIEW v_scores_por_bloco AS
+SELECT
+  r.session_id,
+  d.nome_loja,
+  d.segmento,
+  d.cidade,
+  d.cohort_geral,
+  r.bloco,
+  SUM(r.resposta) AS score_bloco
+FROM respostas r
+JOIN diagnosticos d ON d.session_id = r.session_id
+WHERE d.completed = true
+GROUP BY r.session_id, d.nome_loja, d.segmento, d.cidade, d.cohort_geral, r.bloco
+ORDER BY r.session_id, r.bloco;
