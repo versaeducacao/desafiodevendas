@@ -85,6 +85,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS diagnosticos_updated_at ON diagnosticos;
 CREATE TRIGGER diagnosticos_updated_at
   BEFORE UPDATE ON diagnosticos
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();

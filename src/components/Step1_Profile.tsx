@@ -4,6 +4,7 @@ import {
   SEGMENTOS, LOCALIZACOES, DATAS_COMERCIAIS,
   QUANTIDADE_LOJAS_OPTIONS, isMultiLoja,
 } from "../data/questions";
+import { Select } from "./Select";
 
 interface Props {
   initial: StoreProfile;
@@ -338,11 +339,11 @@ export function Step1_Profile({ initial, onSave }: Props) {
             <div style={grid2}>
               <div>
                 <label style={{ fontSize: 12, color: "var(--ev-muted)", marginBottom: 5, display: "block" }}>Segmento *</label>
-                <SelectInline value={form.segmento} onChange={(v) => set("segmento", v)} options={SEGMENTOS} />
+                <Select value={form.segmento} onChange={(v) => set("segmento", v)} options={SEGMENTOS} />
               </div>
               <div>
                 <label style={{ fontSize: 12, color: "var(--ev-muted)", marginBottom: 5, display: "block" }}>Tipo de ponto</label>
-                <SelectInline value={form.localizacao_tipo} onChange={(v) => set("localizacao_tipo", v)} options={LOCALIZACOES} />
+                <Select value={form.localizacao_tipo} onChange={(v) => set("localizacao_tipo", v)} options={LOCALIZACOES} />
               </div>
             </div>
           </>
@@ -585,20 +586,3 @@ function NextBtn({ disabled = false, onClick, label = "Continuar →" }: {
   );
 }
 
-function SelectInline({ value, onChange, options }: {
-  value: string; onChange: (v: string) => void; options: string[];
-}) {
-  return (
-    <div style={{ position: "relative" }}>
-      <select className="ev-select" value={value} onChange={(e) => onChange(e.target.value)}
-        style={{ paddingRight: 32 }}>
-        <option value="">Selecione…</option>
-        {options.map((o) => <option key={o} value={o}>{o}</option>)}
-      </select>
-      <span style={{
-        position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
-        pointerEvents: "none", color: "var(--ev-muted-2)", fontSize: 11,
-      }}>▾</span>
-    </div>
-  );
-}
